@@ -1,0 +1,4 @@
+smservlet
+=========
+
+Self Mapping Servlet
