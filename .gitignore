@@ -7,7 +7,7 @@
 
 # Eclipse files
 .classpath
-.projet
+.project
 
 # Maven files
 target/*
