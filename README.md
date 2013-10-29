@@ -23,14 +23,14 @@ For more examples please have a look in the wiki pages linked below.
 
 > ##### Installation
 
-#### Request Mapping
-Mapping of the request to the method is achieved by annotating the method with @RequestMapping. 
-Simple example:
+#### Documentation
 
+> #####[Request Mapping](https://github.com/mara-mfa/smservlet/wiki/Request-Mapping)
 
-#### Attribute deserialization
+> ##### Attribute deserialization
 
-#### Response serialization
+> ##### Response serialization
+
 
 #### Extending
 
