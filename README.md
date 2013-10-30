@@ -12,7 +12,7 @@ the servlet method should be annotated the following way in order to be called.
 ```java
 public class ExampleServlet extends SelfMappedServlet {
   @RequestMapping("data/addContact/{id}")
-  public Object addContact(@PathVariable("id") String id, @Attribute(type=Format.JSON, value="contact") Contact c) {
+  public Object addContact(@PathVariable("id") String id, @Attribute(type="json", value="contact") Contact c) {
     // do something with Contact object and personId 
   }
 }
