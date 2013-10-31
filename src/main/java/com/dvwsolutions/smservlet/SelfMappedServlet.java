@@ -49,6 +49,10 @@ public abstract class SelfMappedServlet extends HttpServlet {
 				response.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
 				break;
 				
+			case UNAUTHORIZED:
+				response.sendError(HttpServletResponse.SC_UNAUTHORIZED, e.getMessage());
+				break;
+				
 			default:
 				response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
 				break;

@@ -9,5 +9,7 @@ public enum MappingProcessorExceptionType {
 	
 	UNSUPPORTED_ATTRIBUTE_TYPE,
 	
+	UNAUTHORIZED,
+	
 	PATH_VARIABLE_URL_DECODE;
 }
