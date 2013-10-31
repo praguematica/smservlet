@@ -1,5 +1,8 @@
 package com.dvwsolutions.urlmapping;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
+
 
 public class MappingProcessorError {
 	private String message;
@@ -38,7 +41,14 @@ public class MappingProcessorError {
 
 	@Override
 	public String toString() {
-		return "Error Message: " + message + "";
+		String details = "";
+		if (throwable != null) {
+			StringWriter sw = new StringWriter();
+			PrintWriter pw = new PrintWriter(sw);
+			throwable.printStackTrace(pw);
+			details = "\n\nDetails: " + sw.toString();
+		}
+		return "Error Message: " + message + details;
 	}
 	
 	

@@ -13,5 +13,5 @@ import com.dvwsolutions.urlmapping.serializers.Format;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface SelfMapped {
 	public Class<? extends ResponseHandler> responseHandler() default ResponseHandlerDefaultImpl.class;
-	public String responseFormat() default Format.STRING;
+	public String responseFormat() default Format.UNSPECIFIED;
 }

@@ -1,15 +1,20 @@
 package com.dvwsolutions.urlmapping;
 
+import java.io.UnsupportedEncodingException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.URLDecoder;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -23,6 +28,7 @@ import com.dvwsolutions.urlmapping.handlers.ResponseHandlerDefaultImpl;
 import com.dvwsolutions.urlmapping.serializers.Format;
 import com.dvwsolutions.urlmapping.serializers.Serializer;
 import com.dvwsolutions.urlmapping.serializers.SerializerJsonImpl;
+import com.dvwsolutions.urlmapping.serializers.SerializerNoneImpl;
 import com.dvwsolutions.urlmapping.serializers.SerializerStringImpl;
 
 public class MappingProcessor {	
@@ -30,6 +36,7 @@ public class MappingProcessor {
 	private List<Method> annotatedMethods;
 	private Object annotatedObject;
 	
+	private Serializer defaultSerializer = new SerializerNoneImpl();
 	private Map<String, Serializer> serializers = new HashMap<String, Serializer>();
 	
 	public MappingProcessor(Object annotatedObject) throws MappingProcessorException {
@@ -64,12 +71,14 @@ public class MappingProcessor {
 			Serializer serializer;
 			if (!urlPtn.responseFormat().equals(Format.UNSPECIFIED)) 
 				serializer = serializers.get(urlPtn.responseFormat());
-			else
+			else if (selfMappedClassAnnotation != null && selfMappedClassAnnotation.responseFormat() != null)
 				serializer = serializers.get(selfMappedClassAnnotation.responseFormat());
+			else
+				serializer = defaultSerializer;
 			
 			if (urlPtn != null) {
 				try {
-					Object methodResult = getMethodResult(path, method, urlPtn, request);
+					Object methodResult = getMethodResult(path, method, urlPtn, request, response);
 					if (methodResult != null) {
 						if (serializer != null) {
 							methodResult = serializer.serialize(methodResult);
@@ -160,7 +169,7 @@ public class MappingProcessor {
 	 * @throws InvocationTargetException
 	 * @throws InstantiationException
 	 */
-	private Object getMethodResult(String path, Method method, RequestMapping urlPtn, HttpServletRequest request) throws Throwable {
+	private Object getMethodResult(String path, Method method, RequestMapping urlPtn, HttpServletRequest request, HttpServletResponse response) throws Throwable {
 		if (path == null) throw new IllegalArgumentException("path is null");
 		if (path.indexOf("{") > -1) throw new IllegalArgumentException("path contains restricted character '{'");
 		if (path.indexOf("}") > -1) throw new IllegalArgumentException("path contains restricted character '}'");
@@ -189,21 +198,53 @@ public class MappingProcessor {
 		Object[] paramValues = new Object[paramTypes.length];
 
 		for (int i = 0; i < paramTypes.length; i++) {
-			if (paramTypes[i] == ServletRequest.class) {
+			if (ServletRequest.class.isAssignableFrom(paramTypes[i])) {
 				paramValues[i] = request;
 				continue;
 			}
 			
-			if (paramTypes[i] == HttpSession.class) {
-				paramValues[i] = request!=null?request.getSession():null;
+			if (ServletResponse.class.isAssignableFrom(paramTypes[i])) {
+				paramValues[i] = response;
 				continue;
 			}
 			
-//			if (paramTypes[i] == String.class) {
+			if (HttpSession.class.isAssignableFrom(paramTypes[i])) {
+				paramValues[i] = request!=null?request.getSession():null;
+				continue;
+			}
+						
+			Set<Class<?>> allowedTypes = new HashSet<Class<?>>();
+			allowedTypes.add(String.class);
+			allowedTypes.add(Integer.class);
+			allowedTypes.add(Long.class);
+			
+			if (!allowedTypes.contains(paramTypes[i])) {
+				throw new MappingProcessorException(MappingProcessorExceptionType.UNSUPPORTED_ATTRIBUTE_TYPE, "Unsupported attribute type: " + paramTypes[i].getCanonicalName());
+			}
+			
 			for (Annotation a: annotations[i]) {
 				if (a instanceof PathVariable) {
-					paramValues[i] = urlParamValues.get(((PathVariable) a).value()); 
-					break;
+					String urlParamValue = urlParamValues.get(((PathVariable) a).value()); 
+					try {
+						// Url param comes back always as string, use corresponding deserializer to sort integer and long params
+						Serializer stringSerializer = serializers.get(Format.STRING);
+						if (stringSerializer != null) {
+							paramValues[i] = stringSerializer.deserialize(URLDecoder.decode(urlParamValue, "UTF-8"), paramTypes[i]);
+						} else {
+							throw new MappingProcessorException(MappingProcessorExceptionType.DESERIALIZE_ERROR, "Can't find a serializer for " + Format.STRING + " used by PathVariable attribute");
+						}
+
+						// Retype if necessary
+						if (Long.class.equals(paramTypes[i]) || long.class.equals(paramTypes[i])) {
+							paramValues[i] = Long.parseLong(String.valueOf(paramValues[i]));
+						}
+						if (Integer.class.equals(paramTypes[i]) || int.class.equals(paramTypes[i])) {
+							paramValues[i] = Integer.parseInt(String.valueOf(paramValues[i]));
+						}
+						break;
+					} catch (UnsupportedEncodingException e) {
+						throw new MappingProcessorException(MappingProcessorExceptionType.PATH_VARIABLE_URL_DECODE, e);
+					}					
 				}
 				if (a instanceof Attribute) {
 					Attribute atr = (Attribute) a;
@@ -219,8 +260,7 @@ public class MappingProcessor {
 					}
 					break;
 				}					
-			}
-//			}
+			}			
 		}
 		
 		try {

@@ -8,7 +8,7 @@ public class SerializerJsonImpl implements Serializer {
 	
 	private Gson gson = new GsonBuilder().setPrettyPrinting().create();
 		
-	public String serialize(Object obj) throws MappingProcessorException {
+	public Object serialize(Object obj) throws MappingProcessorException {
 		return gson.toJson(obj);
 	}
 

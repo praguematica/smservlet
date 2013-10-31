@@ -5,9 +5,11 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import com.dvwsolutions.urlmapping.serializers.Format;
+
 @Target(ElementType.PARAMETER)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Attribute {
 	String value() default "";	
-	String format() default "string";
+	String format() default Format.STRING;
 }

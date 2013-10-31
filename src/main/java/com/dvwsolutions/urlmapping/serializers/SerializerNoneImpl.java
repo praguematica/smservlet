@@ -2,24 +2,21 @@ package com.dvwsolutions.urlmapping.serializers;
 
 import com.dvwsolutions.urlmapping.MappingProcessorException;
 
-public class SerializerStringImpl implements Serializer {
-	
+public class SerializerNoneImpl implements Serializer {
+
+	@Override
 	public <T> T deserialize(String str, Class<T> type) {
-		if (Long.class.equals(type)) {
-			return type.cast(Long.valueOf(str));
-		}
-		if (Integer.class.equals(type)) {
-			return type.cast(Integer.valueOf(str));
-		}
 		return type.cast(str);
 	}
 
+	@Override
 	public Object serialize(Object obj) throws MappingProcessorException {
-		return String.valueOf(obj);
+		return obj;
 	}
 
+	@Override
 	public String type() {
-		return Format.STRING;
+		return Format.UNSPECIFIED;
 	}
 
 }

@@ -17,13 +17,13 @@ public abstract class SelfMappedServlet extends HttpServlet {
 
 	private static final long serialVersionUID = 3172984602859820926L;
 	
-	private MappingProcessor urlProcessor;
+	protected MappingProcessor mappingProcessor;
 
 	@Override
 	public void init() throws ServletException {
 		super.init();
 		try {
-			urlProcessor = new MappingProcessor(this);
+			mappingProcessor = new MappingProcessor(this);
 		} catch (Exception e) {
 			throw new ServletException("Error when initializing servlet: " + e.getMessage(), e);
 		}
@@ -42,7 +42,7 @@ public abstract class SelfMappedServlet extends HttpServlet {
 		String path = requestUri.substring(getServletConfig().getServletContext().getContextPath().length()+1);
 		
 		try {
-			urlProcessor.process(path, request, response);
+			mappingProcessor.process(path, request, response);
 		} catch (MappingProcessorException e) {
 			switch(e.getType()) {
 			case MAPPING_NOT_FOUND:
