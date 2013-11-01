@@ -24,7 +24,7 @@ import com.dvwsolutions.urlmapping.annotations.PathVariable;
 import com.dvwsolutions.urlmapping.annotations.RequestMapping;
 import com.dvwsolutions.urlmapping.annotations.SelfMapped;
 import com.dvwsolutions.urlmapping.handlers.ResponseHandler;
-import com.dvwsolutions.urlmapping.handlers.ResponseHandlerDefaultImpl;
+import com.dvwsolutions.urlmapping.handlers.DefaultHandler;
 import com.dvwsolutions.urlmapping.serializers.Format;
 import com.dvwsolutions.urlmapping.serializers.Serializer;
 import com.dvwsolutions.urlmapping.serializers.SerializerJsonImpl;
@@ -67,23 +67,23 @@ public class MappingProcessor {
 	 */
 	public void process(String path, HttpServletRequest request, HttpServletResponse response) throws MappingProcessorException {
 		for (Method method : annotatedMethods) {
-			RequestMapping urlPtn = method.getAnnotation(RequestMapping.class);
+			RequestMapping requestMapping = method.getAnnotation(RequestMapping.class);
 			Serializer serializer;
-			if (!urlPtn.responseFormat().equals(Format.UNSPECIFIED)) 
-				serializer = serializers.get(urlPtn.responseFormat());
+			if (!requestMapping.responseFormat().equals(Format.UNSPECIFIED)) 
+				serializer = serializers.get(requestMapping.responseFormat());
 			else if (selfMappedClassAnnotation != null && selfMappedClassAnnotation.responseFormat() != null)
 				serializer = serializers.get(selfMappedClassAnnotation.responseFormat());
 			else
 				serializer = defaultSerializer;
 			
-			if (urlPtn != null) {
+			if (requestMapping != null) {
 				try {
-					Object methodResult = getMethodResult(path, method, urlPtn, request, response);
+					Object methodResult = getMethodResult(path, method, requestMapping, request, response);
 					if (methodResult != null) {
 						if (serializer != null) {
 							methodResult = serializer.serialize(methodResult);
 						}
-						processMethodResult(response, methodResult, urlPtn);
+						processMethodResult(response, methodResult, requestMapping);
 						return;
 					}
 				} catch (MappingProcessorException e) {
@@ -95,7 +95,7 @@ public class MappingProcessor {
 					if (serializer != null) {
 						errContents = serializer.serialize(err);
 					}
-					processMethodFault(response, errContents, err, urlPtn);
+					processMethodFault(response, errContents, err, requestMapping);
 					return;
 				}
 			}
@@ -109,26 +109,27 @@ public class MappingProcessor {
 	 * Internal success handler
 	 * @param result
 	 * @param method
-	 * @param urlPtn
+	 * @param requestMapping
 	 * @param response
 	 * @throws MappingProcessorException 
 	 * @throws Exception
 	 */
-	private void processMethodResult(HttpServletResponse response, Object result, RequestMapping urlPtn) throws MappingProcessorException {
+	private void processMethodResult(HttpServletResponse response, Object result, RequestMapping requestMapping) throws MappingProcessorException {
+		if (requestMapping == null) throw new MappingProcessorException(MappingProcessorExceptionType.OTHER, "RequestMapping annotation missing in processMethodResult");
 		ResponseHandler responseHandler;
 		try {
-			if (urlPtn != null && urlPtn.responseHandler() != ResponseHandlerDefaultImpl.class) {
-				responseHandler = urlPtn.responseHandler().newInstance();
+			if (requestMapping.responseHandler() != DefaultHandler.class) {
+				responseHandler = requestMapping.responseHandler().newInstance();
 			} else if (selfMappedClassAnnotation != null && selfMappedClassAnnotation.responseHandler() != null) {
 				responseHandler = selfMappedClassAnnotation.responseHandler().newInstance();
 			} else {
-				responseHandler = ResponseHandlerDefaultImpl.class.newInstance();
+				responseHandler = DefaultHandler.class.newInstance();
 			}
 		} catch (Exception e) {
 			throw new MappingProcessorException(MappingProcessorExceptionType.OTHER, "Unable to initialize response handler", e);
 		}
 		
-		responseHandler.result(response, result);		
+		responseHandler.result(response, result, requestMapping);		
 	}
 	
 	/**
@@ -140,15 +141,15 @@ public class MappingProcessor {
 	 * @throws Exception
 	 */
 	
-	private void processMethodFault(HttpServletResponse response, Object errContents, MappingProcessorError err, RequestMapping urlPtn) throws MappingProcessorException {
+	private void processMethodFault(HttpServletResponse response, Object errContents, MappingProcessorError err, RequestMapping requestMapping) throws MappingProcessorException {
 		ResponseHandler responseHandler;
 		try {
-			if (urlPtn != null && urlPtn.responseHandler() != ResponseHandlerDefaultImpl.class) {
-				responseHandler = urlPtn.responseHandler().newInstance();
+			if (requestMapping != null && requestMapping.responseHandler() != DefaultHandler.class) {
+				responseHandler = requestMapping.responseHandler().newInstance();
 			} else if (selfMappedClassAnnotation != null && selfMappedClassAnnotation.responseHandler() != null) {
 				responseHandler = selfMappedClassAnnotation.responseHandler().newInstance();
 			} else {
-				responseHandler = ResponseHandlerDefaultImpl.class.newInstance();
+				responseHandler = DefaultHandler.class.newInstance();
 			}
 		} catch (Exception ee) {
 			throw new MappingProcessorException(MappingProcessorExceptionType.OTHER, "Unable to initialize error handler", ee);
@@ -160,7 +161,7 @@ public class MappingProcessor {
 	 * Invokes the method passing path, get and post parameters to appropriate variables.
 	 * @param path
 	 * @param method
-	 * @param urlPtn
+	 * @param requestMapping
 	 * @param request
 	 * @return Object with results or null, if the method does not match the pattern
 	 * @throws Throwable 
@@ -169,13 +170,13 @@ public class MappingProcessor {
 	 * @throws InvocationTargetException
 	 * @throws InstantiationException
 	 */
-	private Object getMethodResult(String path, Method method, RequestMapping urlPtn, HttpServletRequest request, HttpServletResponse response) throws Throwable {
+	private Object getMethodResult(String path, Method method, RequestMapping requestMapping, HttpServletRequest request, HttpServletResponse response) throws Throwable {
 		if (path == null) throw new IllegalArgumentException("path is null");
 		if (path.indexOf("{") > -1) throw new IllegalArgumentException("path contains restricted character '{'");
 		if (path.indexOf("}") > -1) throw new IllegalArgumentException("path contains restricted character '}'");
 		
-		String ptn = urlPtn.value();
-		if (path.equals(urlPtn)) {
+		String ptn = requestMapping.value();
+		if (path.equals(requestMapping)) {
 			try {
 				return method.invoke(this.annotatedObject);
 			} catch (IllegalArgumentException e) {
@@ -218,13 +219,14 @@ public class MappingProcessor {
 			allowedTypes.add(Integer.class);
 			allowedTypes.add(Long.class);
 			
-			if (!allowedTypes.contains(paramTypes[i])) {
-				throw new MappingProcessorException(MappingProcessorExceptionType.UNSUPPORTED_ATTRIBUTE_TYPE, "Unsupported attribute type: " + paramTypes[i].getCanonicalName());
-			}
+//			if (!allowedTypes.contains(paramTypes[i])) {
+//				throw new MappingProcessorException(MappingProcessorExceptionType.UNSUPPORTED_ATTRIBUTE_TYPE, "Unsupported attribute type: " + paramTypes[i].getCanonicalName());
+//			}
 			
 			for (Annotation a: annotations[i]) {
 				if (a instanceof PathVariable) {
-					String urlParamValue = urlParamValues.get(((PathVariable) a).value()); 
+					PathVariable pathVariable = (PathVariable) a;
+					String urlParamValue = urlParamValues.get(pathVariable.value()); 
 					try {
 						// Url param comes back always as string, use corresponding deserializer to sort integer and long params
 						Serializer stringSerializer = serializers.get(Format.STRING);
@@ -241,10 +243,13 @@ public class MappingProcessor {
 						if (Integer.class.equals(paramTypes[i]) || int.class.equals(paramTypes[i])) {
 							paramValues[i] = Integer.parseInt(String.valueOf(paramValues[i]));
 						}
+
 						break;
 					} catch (UnsupportedEncodingException e) {
 						throw new MappingProcessorException(MappingProcessorExceptionType.PATH_VARIABLE_URL_DECODE, e);
-					}					
+					} catch (NumberFormatException e) {
+						throw new MappingProcessorException(MappingProcessorExceptionType.PATH_VARIABLE_FORMAT, "Cannot parse value for PathVariable " + pathVariable.value(), e);
+					}
 				}
 				if (a instanceof Attribute) {
 					Attribute atr = (Attribute) a;

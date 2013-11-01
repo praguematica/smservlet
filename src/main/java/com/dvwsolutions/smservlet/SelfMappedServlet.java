@@ -45,7 +45,12 @@ public abstract class SelfMappedServlet extends HttpServlet {
 			mappingProcessor.process(path, request, response);
 		} catch (MappingProcessorException e) {
 			switch(e.getType()) {
+			case NOT_FOUND: 
+				response.sendError(HttpServletResponse.SC_NOT_FOUND, e.getMessage());
+				break;
+				
 			case MAPPING_NOT_FOUND:
+			case PATH_VARIABLE_FORMAT:
 				response.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
 				break;
 				
