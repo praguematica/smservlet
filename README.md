@@ -1,39 +1,98 @@
-### SMServlet - Self Mapping Java Servlet
+### Self Mapping Servlet - smservlet
 
+Creating a new servlet by extending smservlet allows user to easily map incoming http requests to servlet's methods by using annotations. The mapping itself is inspired by Spring MVC @RequestMapping. The motivation is to have such mechanism without having to use whole spring mvc. Additionally, smServlet contains the following:
+* deserialization of attributes from JSON
+* serialization of response to JSON
+* mechanism to add custom serialization and deserialization formats
+* custom logic of handling of a response
+* support for downloading respose as a file (attachment)
 
-By extending SMservlet (standard servlet v. 2.5) it is easy to create a lightweight REST-like mechanism by mapping servlet's methods by using of annotations similar to @RequestMapping from Spring MVC.
-
-Additionally, it contains a simple serialization/deserialization and result handling mechanism which can be easily extended by providing onwn types and by implementing of the provided interfaces.
-
-For example, when the client sends the POST request to the server using http://server/data/addContact/2 as url 
-while having contact data in JSON format in parameter called contact_data, 
-the servlet method should be annotated the following way in order to be called.
-
+Simple example:
 ```java
 public class ExampleServlet extends SelfMappedServlet {
-  @RequestMapping("data/addContact/{id}")
-  public Object addContact(@PathVariable("id") String id, @Attribute(type="json", value="contact") Contact c) {
-    // do something with Contact object and personId 
+  @RequestMapping("data/getUser/{id}")
+  public Object getUser(@PathVariable("id") String id) {
+    // do something
   }
 }
 ```
-For more examples please have a look in the wiki pages linked below.
 
-#### Quick start
+Smservlet contains a deserialization mechanism which automaticaly grabs the data from the request and deserialize them to the java object, for example, to map the request with url `data/addUser` which contains POST variable called `user` and this variable contains data in the JSON format, use the following:
+```java
+@RequestMapping("data/addUser")
+public Object addUser(@Attribute(value="user", format=Format.JSON) User user) {
+  // do something
+}
+```
+Similarly, you can specify the output format of the result. The following example shows how to return results in JSON format.
+```java
+@RequestMapping(value="data/getUser/{id}", responseFormat=Format.JSON)
+public Object getUser(@PathVariable("id") String id) {
+   User user = getUserByIdFromSomewhere(id); // get user details from somewhere
+   return user;
+```
+Content type can be specified as well:
+```java
+@RequestMapping(value="data/getUser/{id}", responseFormat=Format.JSON, contentType="application/json")
+public Object getUser(@PathVariable("id") String id) {
+   User user = getUserByIdFromSomewhere(id);
+   return user;
+}
+```
+If you need to something extra with the results apart from printing them into the output stream, you can implement your own response handler by implementing ResponseHandler interface. For example
+```java
+public class CustomResponseHandler implements ResonseHandler {
+   public void fault(HttpServletResponse response, Object errContents, MappingProcessorError err) {
+      // do something
+   }
+   public void result(HttpServletResponse response, Object result, RequestMapping rm) {
+      // do something when exception was thrown
+   }
+}
+```
+This handler is then assigned to the method by the following way
+```java
+@RequestMapping(value="data/getUser/{id}", responseHandler=CustomResponseHandler.class)
+public Object getUser(@PathVariable("id") String id) {
+   User user = getUserByIdFromSomewhere(id);
+   return user;
+}
+```
+Both **responseHandler** and **responseFormat** can be used on the servlet level by using @SelfMapped annotation, so you don't have to specify it for each of the methods, as seen in the following example:
+```java
+@SelfMapped(responseFormat=Format.JSON, responseHandler=CustomResponseHandler.class)
+public class ExampleServlet extends SelfMappedServlet {
+  @RequestMapping("data/getUser/{id}")
+  public Object getUser(@PathVariable("id") String id) {
+    // do something
+  }
+  @RequestMapping("data/addUser")
+  public Object addUser(@Attribute(value="user", format=Format.JSON) User user) {
+    // do something
+  }
+}
+```
+### Downloading files
+There are two different ways how to handle the attachments.
+##### By using annotations
+For downloading files, there is an appropriate ResponseHandler called **FileAttachmentHandler** part of the library. In addition to this handler, there is another parameter called **fileName**
+Example:
+```java
+@RequestMapping("data/getUser/{id}", responseHandler=FileAttachmentHandler.class, fileName="user-details.txt", content-type="text/plain")
+public Object getUser(@Attribute(value="id") String id) {
+   User user = getUserByIdFromSomewhere(id);
+   return user;
+}
+```
+##### Programatically
+If you need a bit of more control, for example, when you need to generate the filename based on the data, you can achieve this by returning **FileAttachment** object. See the following example:
+```java
+@RequestMapping("data/getUser/{id}", responseHandler=FileAttachmentHandler.class)
+public Object getUser(@Attribute(value="id") String id) {
+   User user = getUserByIdFromSomewhere(id);
+   return new FileAttachment("text-plain", "user-details-" + id, user);
+}
+```
 
-> ##### Installation
-
-#### Documentation
-
-> #####[Request Mapping](https://github.com/mara-mfa/smservlet/wiki/Request-Mapping)
-
-> ##### Attribute deserialization
-
-> ##### Response serialization
 
 
-#### Extending
-
-> ##### Custom serialization / deserialization
-
-> ##### Custom response handling
