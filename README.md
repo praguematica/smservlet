@@ -1,13 +1,17 @@
 ### Self Mapping Servlet - smservlet
 
-Creating a new servlet by extending smservlet allows user to easily map incoming http requests to servlet's methods by using annotations. The mapping itself is inspired by Spring MVC @RequestMapping. The motivation is to have such mechanism without having to use whole spring mvc. Additionally, smServlet contains the following:
-* deserialization of attributes from JSON
-* serialization of response to JSON
-* mechanism to add custom serialization and deserialization formats
-* custom logic of handling of a response
+Creating a new servlet by extending smservlet allows user to easily map incoming http requests to servlet's methods by using annotations. The mapping itself is inspired by Spring MVC @RequestMapping. The motivation is to have such mechanism without having to use whole spring mvc. 
+Additionally to the request mapping, smServlet does the following:
+* deserialization of attributes from JSON (using gson)
+* serialization of response to JSON (using gson)
+* contains mechanism to add **custom serialization and deserialization formats**
+* allows to implement **custom logic** of handling of a response
 * support for downloading respose as a file (attachment)
+* see [Documentation](https://github.com/mara-mfa/smservlet/wiki/_pages) for details
 
-Simple example:
+***
+
+To start with, see the following simple example:
 ```java
 public class ExampleServlet extends SelfMappedServlet {
   @RequestMapping("data/getUser/{id}")
