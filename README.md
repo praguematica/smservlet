@@ -8,6 +8,7 @@ Additionally to the request mapping, smServlet does the following:
 * allows to implement **custom logic** of handling of a response
 * support for downloading respose as a file (attachment)
 * see [Documentation](https://github.com/mara-mfa/smservlet/wiki/_pages) for details
+* see [Installation and quick start guide](https://github.com/mara-mfa/smservlet/wiki/0.-Installation) for getting started
 
 ***
 
