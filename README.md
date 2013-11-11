@@ -1,6 +1,6 @@
 ### Self Mapping Servlet - smservlet
 
-Creating a new servlet by extending smservlet allows user to easily map incoming http requests to servlet's methods by using annotations. The mapping itself is inspired by Spring MVC @RequestMapping. The motivation is to have such mechanism without having to use whole spring mvc. 
+Creating a new servlet by extending smservlet allows user to easily map incoming http requests to servlet's methods by using annotations. The mapping itself is inspired by Spring MVC @RequestMapping. The motivation is to have such mechanism without having to use whole spring mvc as well as when being limited by using older servlet specification 2.5. 
 Additionally to the request mapping, smServlet does the following:
 * deserialization of attributes from JSON (using gson)
 * serialization of response to JSON (using gson)
