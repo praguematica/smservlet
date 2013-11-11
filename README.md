@@ -44,6 +44,18 @@ public Object getUser(@PathVariable("id") String id) {
    return user;
 }
 ```
+There are 3 objects which, if declared in the function signature, are automatically set by smservlet.
+* HttpSession
+* HttpServletRequest
+* HttpServletResponse
+
+```java
+@RequestMapping("data/doSomething")
+public Object doSomething(HttpSession session, HttpServletRequest request, HttpServletResponse response) {
+   // do something
+}
+```
+
 If you need to something extra with the results apart from printing them into the output stream, you can implement your own response handler by implementing ResponseHandler interface. For example
 ```java
 public class CustomResponseHandler implements ResonseHandler {
