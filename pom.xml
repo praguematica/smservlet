@@ -3,7 +3,7 @@
     <groupId>com.dvwsolutions.smservlet</groupId>
     <artifactId>smservlet</artifactId>
     <packaging>jar</packaging>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0</version>
     <name>smservlet</name>
     <url>http://maven.apache.org</url>
     <dependencies>
