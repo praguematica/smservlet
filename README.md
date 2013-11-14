@@ -1,4 +1,4 @@
-### Self Mapping Servlet - smservlet
+### SMServlet - self mapped servlet
 
 Creating a new servlet by extending smservlet allows user to easily map incoming http requests to servlet's methods by using annotations. The mapping itself is inspired by Spring MVC @RequestMapping. The motivation is to have such mechanism without having to use whole spring mvc as well as when being limited by using older servlet specification 2.5. 
 Additionally to the request mapping, smServlet does the following:
@@ -7,11 +7,20 @@ Additionally to the request mapping, smServlet does the following:
 * contains mechanism to add **custom serialization and deserialization formats**
 * allows to implement **custom logic** of handling of a response
 * support for downloading respose as a file (attachment)
-* see [Documentation](https://github.com/mara-mfa/smservlet/wiki/_pages) for details
-* see [Installation and quick start guide](https://github.com/mara-mfa/smservlet/wiki/0.-Installation) for getting started
+* see [Installation and quick start guide](https://github.com/mara-mfa/smservlet/wiki/Installation) for getting started
 
 ***
+#### SMServlet - by theory
+The following diagram shows the process from receiving the request to sending back the response.
+<img src="https://s3-eu-west-1.amazonaws.com/smservlet/smservlet_cycle.svg">
+For more deatils follow these links: 
+* [Request Mapping](https://github.com/mara-mfa/smservlet/wiki/Request-Mapping)
+* [Parameter Deserialization](https://github.com/mara-mfa/smservlet/wiki/Request-parameter-deserialization)
+* [Best Practices for annotated method execution](https://github.com/mara-mfa/smservlet/wiki/Best-Practices)
+* [Response Deserialization](https://github.com/mara-mfa/smservlet/wiki/Response-Serialization)
+* [Response Handling](https://github.com/mara-mfa/smservlet/wiki/Response-Handling)
 
+#### SMServlet - by examples
 To start with, see the following simple example:
 ```java
 public class ExampleServlet extends SelfMappedServlet {
@@ -110,6 +119,5 @@ public Object getUser(@Attribute(value="id") String id) {
    return new FileAttachment("text-plain", "user-details-" + id, user);
 }
 ```
-
 
 
