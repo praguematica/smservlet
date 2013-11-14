@@ -1,5 +1,3 @@
-### SMServlet - self mapped servlet
-
 Creating a new servlet by extending smservlet allows user to easily map incoming http requests to servlet's methods by using annotations. The mapping itself is inspired by Spring MVC @RequestMapping. The motivation is to have such mechanism without having to use whole spring mvc as well as when being limited by using older servlet specification 2.5. 
 Additionally to the request mapping, smServlet does the following:
 * deserialization of attributes from JSON (using gson)
@@ -14,11 +12,11 @@ Additionally to the request mapping, smServlet does the following:
 The following diagram shows the process from receiving the request to sending back the response.
 <img src="https://s3-eu-west-1.amazonaws.com/smservlet/smservlet_cycle.svg">
 For more deatils follow these links: 
-* [Request Mapping](https://github.com/mara-mfa/smservlet/wiki/Request-Mapping)
-* [Parameter Deserialization](https://github.com/mara-mfa/smservlet/wiki/Request-parameter-deserialization)
-* [Best Practices for annotated method execution](https://github.com/mara-mfa/smservlet/wiki/Best-Practices)
-* [Response Deserialization](https://github.com/mara-mfa/smservlet/wiki/Response-Serialization)
-* [Response Handling](https://github.com/mara-mfa/smservlet/wiki/Response-Handling)
+* [request mapping](https://github.com/mara-mfa/smservlet/wiki/Request-Mapping)
+* [parameter deserialization](https://github.com/mara-mfa/smservlet/wiki/Request-parameter-deserialization)
+* [best practices for annotated method execution](https://github.com/mara-mfa/smservlet/wiki/Best-Practices)
+* [response serialization](https://github.com/mara-mfa/smservlet/wiki/Response-Serialization)
+* [response handling](https://github.com/mara-mfa/smservlet/wiki/Response-Handling)
 
 #### SMServlet - by examples
 To start with, see the following simple example:
