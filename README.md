@@ -1,6 +1,6 @@
 SMServlet allows user to easily map incoming http requests to servlet's methods by using annotations similar to this:
 ```java
-@RequestMapping(value="data/getUser/{id}", responseFormat=Format.JSON, contentType="application/json")
+@RequestMapping(value="data/getUser/{id}", responseFormat=Format.JSON)
 public Object getUser(@PathVariable("id") String id) {
    User user = getUserByIdFromSomewhere(id);
    return user;
