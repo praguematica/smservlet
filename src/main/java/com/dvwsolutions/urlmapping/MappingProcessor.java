@@ -214,15 +214,6 @@ public class MappingProcessor {
 				continue;
 			}
 						
-			Set<Class<?>> allowedTypes = new HashSet<Class<?>>();
-			allowedTypes.add(String.class);
-			allowedTypes.add(Integer.class);
-			allowedTypes.add(Long.class);
-			
-//			if (!allowedTypes.contains(paramTypes[i])) {
-//				throw new MappingProcessorException(MappingProcessorExceptionType.UNSUPPORTED_ATTRIBUTE_TYPE, "Unsupported attribute type: " + paramTypes[i].getCanonicalName());
-//			}
-			
 			for (Annotation a: annotations[i]) {
 				if (a instanceof PathVariable) {
 					PathVariable pathVariable = (PathVariable) a;
