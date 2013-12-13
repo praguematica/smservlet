@@ -19,7 +19,7 @@ public class JUnitResponseHandler implements ResponseHandler {
 	}
 	
 	@Override
-	public void fault(HttpServletResponse response, Object errContents, MappingProcessorError err) {
+	public void fault(HttpServletResponse response, Object errContents, MappingProcessorError err, RequestMapping requestMapping) {
 		responseFault = String.valueOf(errContents);			
 	}
 }

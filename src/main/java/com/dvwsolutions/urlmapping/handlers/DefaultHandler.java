@@ -11,8 +11,9 @@ import com.dvwsolutions.urlmapping.annotations.RequestMapping;
 
 public class DefaultHandler implements ResponseHandler {
 
-	public void fault(HttpServletResponse response, Object errContents, MappingProcessorError err) {
+	public void fault(HttpServletResponse response, Object errContents, MappingProcessorError err, RequestMapping requestMapping) {
 		try {
+			response.setCharacterEncoding(requestMapping.encoding());
 			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			response.getWriter().println(errContents);
 		} catch (IOException e1) {
@@ -22,6 +23,7 @@ public class DefaultHandler implements ResponseHandler {
 
 	public void result(HttpServletResponse response, Object result, RequestMapping requestMapping) throws MappingProcessorException {
 		try {
+			response.setCharacterEncoding(requestMapping.encoding());
 			response.setContentType(requestMapping.contentType());
 			response.getWriter().print(result);
 		} catch (IOException e) {

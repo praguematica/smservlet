@@ -17,4 +17,5 @@ public @interface RequestMapping {
 	public String responseFormat() default Format.UNSPECIFIED;
 	public String contentType() default "text/plain";
 	public String fileName() default "";
+	public String encoding() default "UTF-8";
 }

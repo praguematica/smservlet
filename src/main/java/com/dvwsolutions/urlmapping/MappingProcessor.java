@@ -152,7 +152,7 @@ public class MappingProcessor {
 		} catch (Exception ee) {
 			throw new MappingProcessorException(MappingProcessorExceptionType.OTHER, "Unable to initialize error handler", ee);
 		}
-		responseHandler.fault(response, errContents, err);
+		responseHandler.fault(response, errContents, err, requestMapping);
 	}
 	
 	/**
