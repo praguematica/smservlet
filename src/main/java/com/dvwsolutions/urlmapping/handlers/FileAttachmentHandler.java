@@ -39,6 +39,7 @@ public class FileAttachmentHandler extends DefaultHandler {
  
 			}
 			
+			response.setCharacterEncoding(rm.encoding());
 			response.setContentType(contentType);
 			response.setContentLength((contents!=null)?contents.length:0);
 			response.setHeader("Content-Transfer-Encoding", "binary");
