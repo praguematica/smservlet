@@ -2,6 +2,7 @@ package com.dvwsolutions.urlmapping;
 
 public enum MappingProcessorExceptionType {
 	MAPPING_NOT_FOUND, 
+	MAPPING_NOT_MATCH,
 	OTHER, 
 	ILLEGAL_ARGUMENTS, 
 	ILLEGAL_ACCESS, 
