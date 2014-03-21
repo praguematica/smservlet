@@ -43,7 +43,9 @@ public class FileAttachmentHandler extends DefaultHandler {
 			response.setContentType(contentType);
 			response.setContentLength((contents!=null)?contents.length:0);
 			response.setHeader("Content-Transfer-Encoding", "binary");
-			response.setHeader("Content-Disposition","attachment; filename=\"" + fileName );	
+			if (fileName != null && !fileName.equals("")) {
+				response.setHeader("Content-Disposition","attachment; filename=\"" + fileName );
+			}
 			response.getOutputStream().write(contents);
 			
 		} catch (IOException e) {
