@@ -11,3 +11,6 @@
 
 # Maven files
 target/*
+
+# Idea files
+.idea
