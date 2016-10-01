@@ -8,11 +8,11 @@
 	<name>smservlet</name>
 	<url>https://github.com/praguematica/smservlet</url>
 
-	<!--<parent>-->
-		<!--<groupId>org.sonatype.oss</groupId>-->
-		<!--<artifactId>oss-parent</artifactId>-->
-		<!--<version>9</version>-->
-	<!--</parent>-->
+	<parent>
+		<groupId>org.sonatype.oss</groupId>
+		<artifactId>oss-parent</artifactId>
+		<version>9</version>
+	</parent>
 
 	<licenses>
 		<license>
