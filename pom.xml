@@ -22,10 +22,6 @@
 	</licenses>
 
 	<scm>
-		<url>https://github.com/praguematica/smservlet/tags/smservlet-1.2.0</url>
-	</scm>
-
-	<scm>
 		<url>https://github.com/praguematica/smservlet</url>
 		<connection>scm:git:git@github.com:praguematica/smservlet.git</connection>
 		<developerConnection>scm:git:git@github.com:praguematica/smservlet.git</developerConnection>
