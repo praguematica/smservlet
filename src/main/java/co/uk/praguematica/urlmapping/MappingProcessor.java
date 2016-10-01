@@ -59,12 +59,10 @@ public class MappingProcessor {
 	/**
 	 * Based on the path, it finds the method to be run and runs it
 	 * 
-	 * @param path
-	 * @param request
-	 * @param response
-	 * @return
-	 * @throws MappingProcessorException
-	 * @throws Exception
+	 * @param path - url path
+	 * @param request - HTTPServletRequest
+	 * @param response - HTTPServletResponse
+	 * @throws MappingProcessorException throws MappingProcessorException
 	 */
 	public void process(String path, HttpServletRequest request, HttpServletResponse response) throws MappingProcessorException {
 		for (Method method : annotatedMethods) {
@@ -119,7 +117,6 @@ public class MappingProcessor {
 	 * Internal success handler
 	 * 
 	 * @param result
-	 * @param method
 	 * @param requestMapping
 	 * @param response
 	 * @throws MappingProcessorException
@@ -146,10 +143,10 @@ public class MappingProcessor {
 
 	/**
 	 * Internal failure handler
-	 * 
-	 * @param message
-	 * @param e
+	 *
 	 * @param response
+	 * @param errContents
+	 * @param err
 	 * @throws MappingProcessorException
 	 * @throws Exception
 	 */
