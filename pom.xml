@@ -1,12 +1,26 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>co.uk.praguematica.smservlet</groupId>
+	<groupId>co.uk.praguematica</groupId>
 	<artifactId>smservlet</artifactId>
 	<packaging>jar</packaging>
-	<version>1.2</version>
+	<version>1.2.0</version>
 	<name>smservlet</name>
-	<url>http://maven.apache.org</url>
+	<url>https://github.com/praguematica/smservlet</url>
+
+	<licenses>
+		<license>
+			<name>Apache License, Version 2.0</name>
+			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+			<distribution>repo</distribution>
+		</license>
+	</licenses>
+
+	<scm>
+		<url>https://github.com/praguematica/smservlet</url>
+	</scm>
+
+
 	<dependencies>
 		<dependency>
 			<groupId>javax.servlet</groupId>
