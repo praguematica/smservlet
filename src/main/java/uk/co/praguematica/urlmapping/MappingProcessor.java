@@ -8,6 +8,7 @@ import java.net.URLDecoder;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -17,6 +18,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import com.google.gson.GsonBuilder;
 import uk.co.praguematica.urlmapping.annotations.Attribute;
 import uk.co.praguematica.urlmapping.annotations.PathVariable;
 import uk.co.praguematica.urlmapping.annotations.RequestMapping;
@@ -30,6 +32,7 @@ import uk.co.praguematica.urlmapping.serializers.SerializerNoneImpl;
 import uk.co.praguematica.urlmapping.serializers.SerializerStringImpl;
 
 public class MappingProcessor {
+	private static final Logger LOGGER = Logger.getLogger( MappingProcessor.class.getName() );
 	private SelfMapped selfMappedClassAnnotation;
 	private List<Method> annotatedMethods;
 	private Object annotatedObject;
@@ -44,7 +47,13 @@ public class MappingProcessor {
 
 		// Register serializers
 		registerSerializer(new SerializerStringImpl());
-		registerSerializer(new SerializerJsonImpl());
+		// Check if gson is present and register JSON serializer
+		try {
+			Class.forName( "com.google.gson.Gson" );
+			registerSerializer(new SerializerJsonImpl());
+		} catch( ClassNotFoundException e ) {
+			LOGGER.warning("There has been a problem registering JSON serializer: " + e.getMessage() + " is missing");
+		}
 
 	}
 
