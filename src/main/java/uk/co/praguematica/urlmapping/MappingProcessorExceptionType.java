@@ -1,8 +1,7 @@
 package uk.co.praguematica.urlmapping;
 
 public enum MappingProcessorExceptionType {
-	MAPPING_NOT_FOUND, 
-	MAPPING_NOT_MATCH,
+	MAPPING_NOT_FOUND,
 	OTHER, 
 	ILLEGAL_ARGUMENTS, 
 	ILLEGAL_ACCESS, 
@@ -19,5 +18,7 @@ public enum MappingProcessorExceptionType {
 	
 	PATH_VARIABLE_URL_DECODE, PATH_VARIABLE_FORMAT,
 	
-	ATTACHMENT_HANDLING_ERROR;
+	ATTACHMENT_HANDLING_ERROR,
+
+	SECURITY_ERROR;
 }

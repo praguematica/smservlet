@@ -55,7 +55,7 @@ public abstract class SelfMappedServlet extends HttpServlet {
 				break;
 				
 			case UNAUTHORIZED:
-				response.sendError(HttpServletResponse.SC_UNAUTHORIZED, e.getMessage());
+				response.sendError(HttpServletResponse.SC_FORBIDDEN, e.getMessage());
 				break;
 				
 			default:
@@ -63,6 +63,10 @@ public abstract class SelfMappedServlet extends HttpServlet {
 				break;
 			}
 		}
-	}	
+	}
+
+	protected boolean checkAuthentication(HttpServletRequest request) {
+		return true;
+	}
 }
 
