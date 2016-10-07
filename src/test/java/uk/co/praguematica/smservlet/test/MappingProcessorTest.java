@@ -1,6 +1,7 @@
 package uk.co.praguematica.smservlet.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import org.junit.Before;
@@ -58,6 +59,21 @@ public class MappingProcessorTest {
 		assertEquals("pathvariable test", JUnitResponseHandler.responseResult, "pathvariable2:abc/def");
 	}
 
+	@Test
+	public void testSecurity() throws MappingProcessorException {
+		mp.process("test-allowed-security", null, null);
+		assertEquals("allowed security test", JUnitResponseHandler.responseResult, "RESULT");
+
+		try {
+			mp.process("test-restricted-security", null, null);
+			assertTrue("restricted security test", false); // it should not get here
+		} catch (Exception e) {
+			assertEquals("restricted security test - correct exception fired", MappingProcessorException.class, e.getClass());
+			assertEquals("restricted security test - correct exception type fired", MappingProcessorExceptionType.class, ((MappingProcessorException) e).getType().getClass());
+		}
+
+	}
+
 	
 	// ******************************************************
 	// Mapped methods	
@@ -76,5 +92,17 @@ public class MappingProcessorTest {
 	public Object testPathVariable_map2(@PathVariable("a") String a, @PathVariable("b") String b) throws MappingProcessorException {
 		return "pathvariable2:" + a + "/" + b;
 	}
+
+	@RequestMapping(value = "test-restricted-security", securityHandler = TestRestrictedSecurityHandler.class)
+	public String testRestrictedSecurity() throws MappingProcessorException {
+		return "RESULT";
+	}
+
+	@RequestMapping(value = "test-allowed-security", securityHandler = TestAllowedSecurityHandler.class)
+	public String testAllowedSecurity() throws MappingProcessorException {
+		return "RESULT";
+	}
+
+
 
 }
