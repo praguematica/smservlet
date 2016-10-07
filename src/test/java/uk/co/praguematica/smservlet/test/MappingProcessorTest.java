@@ -7,6 +7,7 @@ import static org.junit.Assert.fail;
 import org.junit.Before;
 import org.junit.Test;
 
+import uk.co.praguematica.smservlet.UserContext;
 import uk.co.praguematica.urlmapping.MappingProcessor;
 import uk.co.praguematica.urlmapping.MappingProcessorException;
 import uk.co.praguematica.urlmapping.MappingProcessorExceptionType;
@@ -62,7 +63,7 @@ public class MappingProcessorTest {
 	@Test
 	public void testSecurity() throws MappingProcessorException {
 		mp.process("test-allowed-security", null, null);
-		assertEquals("allowed security test", JUnitResponseHandler.responseResult, "RESULT");
+		assertEquals("allowed security test", JUnitResponseHandler.responseResult, "RESULT: test (test user)");
 
 		try {
 			mp.process("test-restricted-security", null, null);
@@ -99,8 +100,8 @@ public class MappingProcessorTest {
 	}
 
 	@RequestMapping(value = "test-allowed-security", securityHandler = TestAllowedSecurityHandler.class)
-	public String testAllowedSecurity() throws MappingProcessorException {
-		return "RESULT";
+	public String testAllowedSecurity(UserContext userContext) throws MappingProcessorException {
+		return "RESULT: " + userContext.getUserId() + " (" + userContext.getUserName() + ")";
 	}
 
 
