@@ -19,12 +19,15 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import com.google.gson.GsonBuilder;
+import uk.co.praguematica.smservlet.UserContext;
 import uk.co.praguematica.urlmapping.annotations.Attribute;
 import uk.co.praguematica.urlmapping.annotations.PathVariable;
 import uk.co.praguematica.urlmapping.annotations.RequestMapping;
 import uk.co.praguematica.urlmapping.annotations.SelfMapped;
 import uk.co.praguematica.urlmapping.handlers.DefaultHandler;
+import uk.co.praguematica.urlmapping.handlers.DefaultSecurityHandler;
 import uk.co.praguematica.urlmapping.handlers.ResponseHandler;
+import uk.co.praguematica.urlmapping.handlers.SecurityHandler;
 import uk.co.praguematica.urlmapping.serializers.Format;
 import uk.co.praguematica.urlmapping.serializers.Serializer;
 import uk.co.praguematica.urlmapping.serializers.SerializerJsonImpl;
@@ -76,6 +79,10 @@ public class MappingProcessor {
 	public void process(String path, HttpServletRequest request, HttpServletResponse response) throws MappingProcessorException {
 		for (Method method : annotatedMethods) {
 			RequestMapping requestMapping = method.getAnnotation(RequestMapping.class);
+			UserContext userContext = new UserContext();
+			Boolean authOk = false;
+
+			// Get serializer
 			Serializer serializer;
 			if (!requestMapping.responseFormat().equals(Format.UNSPECIFIED))
 				serializer = serializers.get(requestMapping.responseFormat());
@@ -86,22 +93,32 @@ public class MappingProcessor {
 
 			if (requestMapping != null) {
 				try {
+					// Handle authentication
+					SecurityHandler securityHandler = null;
+					if (requestMapping.securityHandler() != DefaultSecurityHandler.class) {
+						securityHandler = requestMapping.securityHandler().newInstance();
+					} else if (selfMappedClassAnnotation != null && selfMappedClassAnnotation.securityHandler() != null) {
+						securityHandler = selfMappedClassAnnotation.securityHandler().newInstance();
+					} else {
+						securityHandler = DefaultSecurityHandler.class.newInstance();
+					}
+					userContext = securityHandler.getUserContext(request);
+
+
+					// Get method results
 					Object methodResult = null;
-					try {
-						methodResult = getMethodResult(path, method, requestMapping, request, response);
+
+					if (methodMatchesMapping(path, method, requestMapping)) {
+						if (!securityHandler.checkAuthentication(request)) {
+							throw new MappingProcessorException(MappingProcessorExceptionType.UNAUTHORIZED);
+						}
+						methodResult = getMethodResult(path, method, requestMapping, request, response, userContext);
 						if (methodResult != null && serializer != null) {
 							methodResult = serializer.serialize(methodResult);
 						}
 						processMethodResult(response, methodResult, requestMapping);
 						return;
-						
-					} catch (MappingProcessorException me) {
-						// If the exception is other than not matching method, rethrow. Otherwise continue
-						if (me.getType() != MappingProcessorExceptionType.MAPPING_NOT_MATCH) {
-							throw me;
-						}
-							
-					}					
+					}
 
 				} catch (MappingProcessorException e) {
 					throw e;
@@ -183,7 +200,6 @@ public class MappingProcessor {
 	 * @param path
 	 * @param method
 	 * @param requestMapping
-	 * @param request
 	 * @return Object with results or null, if the method does not match the
 	 *         pattern
 	 * @throws Throwable
@@ -192,7 +208,7 @@ public class MappingProcessor {
 	 * @throws InvocationTargetException
 	 * @throws InstantiationException
 	 */
-	private Object getMethodResult(String path, Method method, RequestMapping requestMapping, HttpServletRequest request, HttpServletResponse response) throws Throwable {
+	private Boolean methodMatchesMapping(String path, Method method, RequestMapping requestMapping) throws Throwable {
 		if (path == null)
 			throw new IllegalArgumentException("path is null");
 		if (path.indexOf("{") > -1)
@@ -200,7 +216,18 @@ public class MappingProcessor {
 		if (path.indexOf("}") > -1)
 			throw new IllegalArgumentException("path contains restricted character '}'");
 
-		String ptn = requestMapping.value();
+		if (path.equals(requestMapping)) {
+			return true;
+		}
+
+		Map<String, String> urlParamValues = getPathVariables(requestMapping.value(), path);
+		if (urlParamValues == null) { // if paramvalues null, then the method does not match the pattern
+			return false;
+		}
+		return true;
+	}
+
+	private Object getMethodResult(String path, Method method, RequestMapping requestMapping, HttpServletRequest request, HttpServletResponse response, UserContext userContext) throws Throwable {
 		if (path.equals(requestMapping)) {
 			try {
 				return method.invoke(this.annotatedObject);
@@ -213,11 +240,7 @@ public class MappingProcessor {
 			}
 		}
 
-		Map<String, String> urlParamValues = getPathVariables(ptn, path);
-		if (urlParamValues == null) { // if paramvalues null, then the method does not match the pattern
-			throw new MappingProcessorException(MappingProcessorExceptionType.MAPPING_NOT_MATCH);
-		}
-
+		Map<String, String> urlParamValues = getPathVariables(requestMapping.value(), path);
 		Annotation[][] annotations = method.getParameterAnnotations();
 		Class<?>[] paramTypes = method.getParameterTypes();
 		Object[] paramValues = new Object[paramTypes.length];
@@ -235,6 +258,11 @@ public class MappingProcessor {
 
 			if (HttpSession.class.isAssignableFrom(paramTypes[i])) {
 				paramValues[i] = request != null ? request.getSession() : null;
+				continue;
+			}
+
+			if (UserContext.class.isAssignableFrom(paramTypes[i])) {
+				paramValues[i] = userContext;
 				continue;
 			}
 

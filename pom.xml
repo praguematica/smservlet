@@ -3,7 +3,7 @@
 	<groupId>uk.co.praguematica</groupId>
 	<artifactId>smservlet</artifactId>
 	<packaging>jar</packaging>
-	<version>1.2.3-SNAPSHOT</version>
+	<version>1.2.4-SNAPSHOT</version>
 	<name>smservlet</name>
 	<url>https://github.com/praguematica/smservlet</url>
 
